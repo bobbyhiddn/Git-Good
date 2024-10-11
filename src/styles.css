@@ -1,57 +1,171 @@
 /* src/styles.css */
+
+/* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f5f5f5;
-  }
-  
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #1e1e1e; /* Dark Grey Background */
+  color: #ffffff; /* Default text color to white for readability */
+}
+
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #2e2e2e; /* Slightly lighter dark grey for contrast */
+  padding: 40px;
+  border-radius: 8px;
+}
+
+/* Headings */
+h1,
+h2 {
+  color: #ff8c00; /* Orange for headings */
+}
+
+/* Paragraph Text */
+p {
+  color: #cccccc; /* Light grey for paragraph text */
+}
+
+/* Code Blocks */
+pre {
+  background-color: #333333; /* Darker grey for code blocks */
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+code {
+  font-family: 'Courier New', monospace;
+  color: #ffcc80; /* Lighter orange for inline code */
+}
+
+/* Terminal Styles */
+.terminal {
+  background-color: #000000;
+  color: #ff8c00;
+  padding: 15px;
+  border-radius: 5px;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 20px;
+  max-height: 300px; /* Set a max height */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+/* Terminal Form */
+.terminal-form {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.terminal-input {
+  flex: 1;
+  background-color: transparent;
+  border: none;
+  color: #ffcc80; /* Lighter orange for input text */
+  font-family: inherit;
+  font-size: 1em;
+  margin-right: 10px;
+}
+
+.terminal-input::placeholder {
+  color: #777777; /* Grey placeholder text */
+}
+
+.terminal-input:focus {
+  outline: none;
+}
+
+/* Send Button */
+.send-button {
+  background-color: #ff8c00; /* Orange background */
+  color: #ffffff; /* White text */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1em;
+  transition: background-color 0.3s;
+}
+
+.send-button:hover {
+  background-color: #e67e00; /* Slightly darker on hover */
+}
+
+.send-button:focus {
+  outline: none;
+}
+
+.send-button:disabled {
+  background-color: #555555;
+  cursor: not-allowed;
+}
+
+/* Command Prompt */
+.command-prompt {
+  color: #ffcc80; /* Lighter orange for command prompt */
+  font-weight: bold;
+}
+
+/* User Command */
+.user-command {
+  color: #00ff00; /* Green color for user's commands */
+  font-weight: bold;
+}
+
+/* Command Output */
+.command-output {
+  color: #ffffff; /* White text for command output */
+  margin-left: 20px; /* Indent output for clarity */
+}
+
+/* Error Messages */
+.command-output.error {
+  color: #ff4444; /* Red color for errors */
+}
+
+/* Initial Instruction */
+.initial-instruction {
+  color: #cccccc; /* Light grey for instructions */
+  font-style: italic;
+}
+
+/* Section Instruction */
+.section-instruction {
+  color: #cccccc; /* Light grey */
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+/* Additional Styles */
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
   .app-container {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 8px;
+    padding: 20px;
   }
-  
-  h1, h2 {
-    color: #333;
-  }
-  
-  p {
-    color: #555;
-  }
-  
-  pre {
-    background-color: #eee;
-    padding: 10px;
-    border-radius: 4px;
-    overflow-x: auto;
-  }
-  
+
+  pre,
   code {
-    font-family: 'Courier New', monospace;
+    font-size: 14px; /* Adjust font size for smaller screens */
   }
-  
-  .terminal {
-    background-color: #1e1e1e;
-    color: #00ff00;
-    padding: 15px;
-    border-radius: 5px;
-    font-family: 'Courier New', monospace;
-    margin-bottom: 20px;
+
+  .terminal-form {
+    flex-direction: column;
+    align-items: stretch;
   }
-  
+
   .terminal-input {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .send-button {
     width: 100%;
-    background-color: transparent;
-    border: none;
-    color: #00ff00;
-    font-family: inherit;
-    font-size: 1em;
   }
-  
-  .terminal-input:focus {
-    outline: none;
-  }
-  
+}

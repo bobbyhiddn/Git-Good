@@ -9,6 +9,9 @@ const CommandSection = ({ title, command, description, initialCommand }) => (
     <pre>
       <code>{command}</code>
     </pre>
+    <p className="section-instruction">
+      Try running the command below in the terminal.
+    </p>
     <GitCommandSimulator initialCommand={initialCommand} />
   </section>
 );
