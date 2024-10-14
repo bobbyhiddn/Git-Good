@@ -41,20 +41,43 @@ Git Good is an interactive web application designed to help users learn and prac
    npm install
    ```
 
-4. Start the development server:
-   ```
-   npm run dev
-   ```
-
-5. Open your browser and visit `http://localhost:3000`
-
 ## Usage
 
-- Navigate through the different sections to learn about various Git commands.
-- Use the interactive terminal to practice Git commands in a simulated environment.
-- Follow the step-by-step guides to understand common Git workflows.
+### Local Development
+
+To run the React development server:
+
+```
+npm start
+```
+
+This will start the development server, typically on `http://localhost:3000`.
+
+### Running the Express Server
+
+To run the Express server:
+
+```
+npm run server
+```
+
+This will start the server, typically on `http://localhost:3000` (or the port specified in your environment variables).
+
+### Building for Production
+
+To create a production build:
+
+```
+npm run build
+```
+
+This will create a `build` directory with optimized production files.
 
 ## Deployment
+
+This project is configured for deployment on Netlify.
+
+## Deployment to Fly.io
 
 This project is configured for deployment on Fly.io. To deploy:
 
@@ -71,6 +94,28 @@ This project is configured for deployment on Fly.io. To deploy:
 3. Deploy the application:
    ```
    fly deploy
+   ```
+
+### Deploying to Netlify
+
+1. Install the Netlify CLI:
+   ```
+   npm install netlify-cli -g
+   ```
+
+2. Login to Netlify:
+   ```
+   netlify login
+   ```
+
+3. Deploy to Netlify:
+   ```
+   netlify deploy
+   ```
+
+4. For production deployment:
+   ```
+   netlify deploy --prod
    ```
 
 ## Contributing
