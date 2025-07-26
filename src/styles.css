@@ -4,9 +4,67 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  padding: 20px;
+  padding: 0;
   background-color: #1e1e1e; /* Dark Grey Background */
   color: #ffffff; /* Default text color to white for readability */
+}
+
+/* App Layout */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* Navigation Styles */
+.navigation {
+  background-color: #2e2e2e;
+  border-bottom: 1px solid #444;
+  padding: 0 20px;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+}
+
+.nav-logo {
+  color: #ff8c00;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-link {
+  color: #cccccc;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.nav-link:hover {
+  color: #ff8c00;
+  background-color: #3e3e3e;
+}
+
+.nav-link.active {
+  color: #ff8c00;
+  background-color: #3e3e3e;
 }
 
 .app-container {
@@ -145,14 +203,365 @@ code {
   white-space: pre-wrap;
 }
 
-@media (max-width: 600px) {
+/* Autocomplete Styles */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 4px;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #3e3e3e;
+  transition: background-color 0.2s;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background-color: #3e3e3e;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-hint {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+  background-color: #1e1e1e;
+  border-top: 1px solid #444;
+}
+
+.terminal-form {
+  position: relative;
+}
+
+/* Syntax Highlighting */
+.syntax-git {
+  color: #ff8c00;
+  font-weight: bold;
+}
+
+.syntax-subcommand {
+  color: #00ffff;
+  font-weight: bold;
+}
+
+.syntax-flag {
+  color: #ffff00;
+}
+
+.syntax-argument {
+  color: #90ee90;
+}
+
+.syntax-path {
+  color: #ffa500;
+}
+
+.syntax-string {
+  color: #98fb98;
+}
+
+.syntax-current-branch {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.syntax-branch {
+  color: #cccccc;
+}
+
+.syntax-success {
+  color: #90ee90;
+}
+
+.syntax-error {
+  color: #ff4444;
+}
+
+.syntax-hash {
+  color: #ffcc80;
+  font-family: monospace;
+}
+
+/* Terminal Page Styles */
+.terminal-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.terminal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.terminal-header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.terminal-header p {
+  font-size: 1.1rem;
+  color: #cccccc;
+}
+
+.terminal-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.terminal-container {
+  min-height: 400px;
+}
+
+.file-system-container {
+  position: sticky;
+  top: 2rem;
+}
+
+/* File System Visualizer Styles */
+.file-system-visualizer {
+  background-color: #2e2e2e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #444;
+}
+
+.file-system-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.file-system-header h3 {
+  color: #ff8c00;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.current-path {
+  color: #cccccc;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.file-system-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #cccccc;
+}
+
+.legend-icon {
+  font-weight: bold;
+}
+
+.file-list {
+  margin-bottom: 1rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.file-icon {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.file-name {
+  flex: 1;
+}
+
+.file-status {
+  width: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.git-status-summary {
+  padding-top: 1rem;
+  border-top: 1px solid #444;
+}
+
+.status-line {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #cccccc;
+}
+
+.status-line strong {
+  color: #ff8c00;
+}
+
+/* Tutorials Page Styles */
+.tutorials-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tutorials-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.tutorials-header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.tutorials-header p {
+  font-size: 1.1rem;
+  color: #cccccc;
+}
+
+.tutorials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.tutorial-card {
+  background-color: #2e2e2e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #444;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.tutorial-card:hover {
+  transform: translateY(-2px);
+  border-color: #ff8c00;
+}
+
+.tutorial-card h3 {
+  color: #ff8c00;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.tutorial-card p {
+  color: #cccccc;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.tutorial-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.difficulty {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.difficulty.beginner {
+  background-color: #4caf50;
+  color: white;
+}
+
+.difficulty.intermediate {
+  background-color: #ff9800;
+  color: white;
+}
+
+.difficulty.advanced {
+  background-color: #f44336;
+  color: white;
+}
+
+.duration {
+  color: #cccccc;
+  font-size: 0.9rem;
+}
+
+.tutorial-button {
+  width: 100%;
+  background-color: #ff8c00;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tutorial-button:hover {
+  background-color: #e67e00;
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    height: auto;
+    padding: 1rem 0;
+  }
+
+  .nav-links {
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
   .app-container {
     padding: 20px;
   }
 
+  .tutorials-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .terminal-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .file-system-container {
+    position: static;
+  }
+
   pre,
   code {
-    font-size: 14px; /* Adjust font size for smaller screens */
+    font-size: 14px;
   }
 
   .terminal-form {
