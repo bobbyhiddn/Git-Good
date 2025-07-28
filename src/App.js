@@ -4,6 +4,8 @@ import Navigation from './components/Navigation';
 import Walkthrough from './pages/Walkthrough';
 import Terminal from './pages/Terminal';
 import Tutorials from './pages/Tutorials';
+import TutorialPage from './pages/TutorialPage';
+import TestPage from './pages/TestPage';
 import './styles.css';
 
 function App() {
@@ -16,6 +18,8 @@ function App() {
             <Route path="/" element={<Walkthrough />} />
             <Route path="/terminal" element={<Terminal />} />
             <Route path="/tutorials" element={<Tutorials />} />
+            <Route path="/tutorials/:tutorialId" element={<TutorialPage />} />
+            <Route path="/test" element={<TestPage />} />
           </Routes>
         </main>
       </div>

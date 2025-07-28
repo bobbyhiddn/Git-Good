@@ -31,6 +31,12 @@ const Navigation = () => {
           >
             Tutorials
           </Link>
+          <Link 
+            to="/test" 
+            className={`nav-link ${isActive('/test') ? 'active' : ''}`}
+          >
+            Test
+          </Link>
         </div>
       </div>
     </nav>

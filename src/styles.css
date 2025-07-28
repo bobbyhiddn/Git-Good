@@ -525,6 +525,222 @@ code {
   background-color: #e67e00;
 }
 
+.tutorial-button {
+  text-decoration: none;
+  display: block;
+  text-align: center;
+}
+
+/* Tutorial Terminal Styles */
+.tutorial-terminal-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.tutorial-header {
+  background-color: #2e2e2e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #444;
+}
+
+.tutorial-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.back-to-tutorials {
+  color: #ff8c00;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #ff8c00;
+  transition: all 0.3s;
+}
+
+.back-to-tutorials:hover {
+  background-color: #ff8c00;
+  color: white;
+}
+
+.tutorial-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.tutorial-button {
+  background-color: #ff8c00;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.tutorial-button:hover:not(:disabled) {
+  background-color: #e67e00;
+}
+
+.tutorial-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tutorial-button.reset {
+  background-color: #6c757d;
+}
+
+.tutorial-button.reset:hover {
+  background-color: #5a6268;
+}
+
+.tutorial-info h1 {
+  color: #ff8c00;
+  margin-bottom: 0.5rem;
+}
+
+.tutorial-info p {
+  color: #cccccc;
+  margin-bottom: 1rem;
+}
+
+.tutorial-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background-color: #444;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #ff8c00;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  color: #cccccc;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.tutorial-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.tutorial-terminal-container {
+  min-height: 500px;
+}
+
+.tutorial-file-system {
+  position: sticky;
+  top: 2rem;
+}
+
+.terminal-entry {
+  margin-bottom: 1rem;
+}
+
+.instruction-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background-color: #1e3a8a;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.instruction-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.instruction-content {
+  flex: 1;
+}
+
+.instruction-text {
+  color: #e0f2fe;
+  line-height: 1.5;
+}
+
+.success-block {
+  background-color: #1a4728;
+  border-left: 4px solid #22c55e;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.success-content {
+  color: #dcfce7;
+  font-weight: 500;
+}
+
+.hint-block {
+  background-color: #451a03;
+  border-left: 4px solid #f59e0b;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.hint-content {
+  color: #fef3c7;
+  font-style: italic;
+}
+
+.tutorial-complete {
+  background-color: #1a4728;
+  border: 2px solid #22c55e;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.tutorial-complete h3 {
+  color: #22c55e;
+  margin-bottom: 1rem;
+}
+
+.tutorial-complete p {
+  color: #dcfce7;
+  margin-bottom: 1.5rem;
+}
+
+.back-to-tutorials-button {
+  background-color: #22c55e;
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.back-to-tutorials-button:hover {
+  background-color: #16a34a;
+}
+
 @media (max-width: 768px) {
   .nav-container {
     flex-direction: column;
@@ -576,5 +792,604 @@ code {
 
   .send-button {
     width: 100%;
+  }
+}
+
+/* Test Terminal Styles */
+.test-terminal-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.test-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.test-header h1 {
+  color: #ff8c00;
+  margin-bottom: 10px;
+}
+
+.test-header p {
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.test-controls {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.run-tests-btn, .reset-tests-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.run-tests-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.run-tests-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.run-tests-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.reset-tests-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.reset-tests-btn:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.test-summary {
+  margin-top: 15px;
+}
+
+.test-score {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.test-score.all-passed {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.test-score.some-failed {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.test-terminal {
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+}
+
+.test-case {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid #444;
+  background-color: #2a2a2a;
+}
+
+.test-case.passed {
+  border-left-color: #28a745;
+  background-color: #1a2e1a;
+}
+
+.test-case.failed {
+  border-left-color: #dc3545;
+  background-color: #2e1a1a;
+}
+
+.test-case.running {
+  border-left-color: #ffc107;
+  background-color: #2e2a1a;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.test-info {
+  margin-bottom: 10px;
+}
+
+.test-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.test-number {
+  color: #ff8c00;
+  font-weight: bold;
+}
+
+.test-title {
+  color: #fff;
+  font-weight: bold;
+  flex: 1;
+}
+
+.test-status {
+  font-size: 18px;
+}
+
+.test-description {
+  color: #ccc;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.test-command {
+  background-color: #000;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.prompt {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.command {
+  color: #fff;
+}
+
+.test-output {
+  margin-top: 10px;
+}
+
+.actual-output, .error-output, .expected-output {
+  margin: 8px 0;
+}
+
+.actual-output strong {
+  color: #28a745;
+}
+
+.error-output strong {
+  color: #dc3545;
+}
+
+.expected-output strong {
+  color: #ffc107;
+}
+
+.test-output pre {
+  background-color: #000;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 5px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.current-test-indicator {
+  text-align: center;
+  color: #ffc107;
+  font-style: italic;
+  padding: 10px;
+  background-color: #2e2a1a;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+/* Tutorial Test and Workflow Styles */
+.tutorial-button.test {
+  background-color: #17a2b8;
+}
+
+.tutorial-button.test:hover:not(:disabled) {
+  background-color: #138496;
+}
+
+.tutorial-button.workflow {
+  background-color: #6f42c1;
+}
+
+.tutorial-button.workflow:hover {
+  background-color: #5a32a3;
+}
+
+.tutorial-test-results {
+  margin: 2rem 0;
+  background-color: #2e2e2e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #444;
+}
+
+.tutorial-test-results h3 {
+  color: #ff8c00;
+  margin-bottom: 1rem;
+}
+
+.test-steps {
+  margin-top: 1rem;
+}
+
+.test-step {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #444;
+  background-color: #1e1e1e;
+}
+
+.test-step.passed {
+  border-left-color: #28a745;
+  background-color: #1a2e1a;
+}
+
+.test-step.failed {
+  border-left-color: #dc3545;
+  background-color: #2e1a1a;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.step-number {
+  color: #ff8c00;
+  font-weight: bold;
+}
+
+.step-status {
+  font-size: 1.2rem;
+}
+
+.step-instruction {
+  color: #cccccc;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
+.step-command {
+  background-color: #000;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  font-family: 'Courier New', monospace;
+}
+
+.step-command .prompt {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.step-command .command {
+  color: #fff;
+}
+
+.step-output {
+  margin-top: 0.5rem;
+}
+
+.step-output strong {
+  color: #ff8c00;
+}
+
+.step-output pre {
+  background-color: #000;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.tutorial-workflow {
+  margin: 2rem 0;
+  background-color: #2e2e2e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #444;
+}
+
+.tutorial-workflow h3 {
+  color: #ff8c00;
+  margin-bottom: 1rem;
+}
+
+.tutorial-workflow p {
+  color: #cccccc;
+  margin-bottom: 1.5rem;
+}
+
+.workflow-commands {
+  margin-bottom: 2rem;
+}
+
+.workflow-step {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #1e1e1e;
+  border-radius: 6px;
+  border-left: 4px solid #6f42c1;
+}
+
+.workflow-step-header {
+  margin-bottom: 0.5rem;
+}
+
+.workflow-step-number {
+  color: #6f42c1;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.workflow-instruction {
+  color: #e0f2fe;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.workflow-command {
+  background-color: #000;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  font-family: 'Courier New', monospace;
+}
+
+.workflow-command .prompt {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.workflow-command code {
+  color: #fff;
+  background: none;
+  padding: 0;
+}
+
+.workflow-explanation {
+  color: #cccccc;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.workflow-summary {
+  background-color: #1a4728;
+  border-radius: 6px;
+  padding: 1.5rem;
+  border-left: 4px solid #22c55e;
+}
+
+.workflow-summary h4 {
+  color: #22c55e;
+  margin-bottom: 1rem;
+}
+
+.workflow-summary ul {
+  color: #dcfce7;
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.workflow-summary li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Test All Tutorials Styles */
+.tutorials-actions {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.test-all-tutorials-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.test-all-tutorials-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.test-all-tutorials-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.all-tutorials-test-results {
+  margin: 3rem 0;
+  background-color: #2e2e2e;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid #444;
+}
+
+.all-tutorials-test-results h2 {
+  color: #ff8c00;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.tutorial-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.tutorial-test-card {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border-left: 4px solid #444;
+  transition: transform 0.2s;
+}
+
+.tutorial-test-card:hover {
+  transform: translateY(-2px);
+}
+
+.tutorial-test-card.passed {
+  border-left-color: #28a745;
+  background-color: #1a2e1a;
+}
+
+.tutorial-test-card.failed {
+  border-left-color: #dc3545;
+  background-color: #2e1a1a;
+}
+
+.tutorial-test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tutorial-test-header h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.tutorial-test-status {
+  font-size: 1.5rem;
+}
+
+.tutorial-test-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.step-count {
+  color: #cccccc;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tutorial-test-summary {
+  color: #cccccc;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.failed-steps {
+  margin-top: 1rem;
+}
+
+.failed-steps summary {
+  color: #ff8c00;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.failed-steps summary:hover {
+  color: #ffaa33;
+}
+
+.failed-step {
+  background-color: #000;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  border-left: 3px solid #dc3545;
+}
+
+.failed-step strong {
+  color: #dc3545;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.failed-command {
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  background-color: #2e2e2e;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+}
+
+.failed-output {
+  color: #ffcc80;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  background-color: #1a1a1a;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .tutorial-results-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .test-all-tutorials-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .all-tutorials-test-results {
+    padding: 1rem;
+    margin: 2rem 0;
+  }
+  
+  .tutorial-test-card {
+    padding: 1rem;
   }
 }

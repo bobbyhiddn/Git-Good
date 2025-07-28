@@ -11,6 +11,9 @@ const TutorialTerminal = ({ tutorial }) => {
   const [currentCommand, setCurrentCommand] = useState('');
   const [isWaitingForCommand, setIsWaitingForCommand] = useState(true);
   const [stepCompleted, setStepCompleted] = useState(false);
+  const [showWorkflow, setShowWorkflow] = useState(false);
+  const [testResults, setTestResults] = useState(null);
+  const [isTestRunning, setIsTestRunning] = useState(false);
   const inputRef = useRef(null);
   const terminalRef = useRef(null);
   const currentStateRef = useRef(gitState);
@@ -87,20 +90,40 @@ const TutorialTerminal = ({ tutorial }) => {
         const file = args[2];
         if (!file) return { newState: workingState, output: 'Error: Missing file argument' };
         
-        const baseFiles = ['README.md', 'src', 'package.json'];
-        const allFiles = [...baseFiles, ...(workingState.untrackedFiles || [])];
+        // Define all possible files that can exist in tutorials
+        const baseFiles = ['README.md', 'readme.md', 'src', 'package.json'];
+        const tutorialFiles = [
+          'src/app.js', 'src/login.js', 'src/auth.js', 'src/config.js', 
+          'src/database.js', 'src/feature.js', 'tests/auth.test.js',
+          'bugfix.js', '.gitignore'
+        ];
+        const allFiles = [...baseFiles, ...tutorialFiles, ...(workingState.untrackedFiles || [])];
         
+        // Case-insensitive file matching for common files
+        let matchedFile = file;
         if (!allFiles.includes(file)) {
-          return { newState: workingState, output: `fatal: pathspec '${file}' did not match any files` };
-        }
-        
-        if (!workingState.stagedChanges.includes(file)) {
-          workingState.stagedChanges.push(file);
-          if (workingState.untrackedFiles && workingState.untrackedFiles.includes(file)) {
-            workingState.untrackedFiles = workingState.untrackedFiles.filter(f => f !== file);
+          // Try case-insensitive matching
+          const lowerFile = file.toLowerCase();
+          const foundFile = allFiles.find(f => f.toLowerCase() === lowerFile);
+          if (foundFile) {
+            matchedFile = foundFile;
+          } else {
+            // Auto-create the file if it doesn't exist (simulate touch)
+            matchedFile = file;
+            if (!workingState.untrackedFiles) workingState.untrackedFiles = [];
+            if (!workingState.untrackedFiles.includes(file)) {
+              workingState.untrackedFiles.push(file);
+            }
           }
         }
-        return { newState: workingState, output: `Changes staged for commit: ${file}` };
+        
+        if (!workingState.stagedChanges.includes(matchedFile)) {
+          workingState.stagedChanges.push(matchedFile);
+          if (workingState.untrackedFiles && workingState.untrackedFiles.includes(matchedFile)) {
+            workingState.untrackedFiles = workingState.untrackedFiles.filter(f => f !== matchedFile);
+          }
+        }
+        return { newState: workingState, output: `Changes staged for commit: ${matchedFile}` };
 
       case 'commit':
         const messageIndex = args.findIndex((arg) => arg === '-m');
@@ -132,13 +155,27 @@ const TutorialTerminal = ({ tutorial }) => {
         return { newState: workingState, output: `Branch '${branchName}' created.` };
 
       case 'checkout':
-        const targetBranch = args[2];
-        if (!targetBranch) return { newState: workingState, output: 'Error: Missing branch name' };
-        if (!workingState.branches.includes(targetBranch)) {
-          return { newState: workingState, output: `error: pathspec '${targetBranch}' did not match any file(s) known to git` };
+        const checkoutFlag = args[2];
+        if (checkoutFlag === '-b') {
+          // Create and switch to new branch
+          const newBranchName = args[3];
+          if (!newBranchName) return { newState: workingState, output: 'Error: Missing branch name' };
+          if (workingState.branches.includes(newBranchName)) {
+            return { newState: workingState, output: `fatal: A branch named '${newBranchName}' already exists.` };
+          }
+          workingState.branches.push(newBranchName);
+          workingState.currentBranch = newBranchName;
+          return { newState: workingState, output: `Switched to a new branch '${newBranchName}'` };
+        } else {
+          // Switch to existing branch
+          const targetBranch = checkoutFlag;
+          if (!targetBranch) return { newState: workingState, output: 'Error: Missing branch name' };
+          if (!workingState.branches.includes(targetBranch)) {
+            return { newState: workingState, output: `error: pathspec '${targetBranch}' did not match any file(s) known to git` };
+          }
+          workingState.currentBranch = targetBranch;
+          return { newState: workingState, output: `Switched to branch '${targetBranch}'` };
         }
-        workingState.currentBranch = targetBranch;
-        return { newState: workingState, output: `Switched to branch '${targetBranch}'` };
 
       case 'log':
         const logOutput = workingState.commits.map(c => `commit ${c.id}\nAuthor: User\nDate:   ${new Date().toDateString()}\n\n\t${c.message}`).join('\n\n');
@@ -148,7 +185,10 @@ const TutorialTerminal = ({ tutorial }) => {
         const branchToMerge = args[2];
         if (!branchToMerge) return { newState: workingState, output: 'Error: Missing branch to merge' };
         if (branchToMerge === workingState.currentBranch) return { newState: workingState, output: 'Already up to date.' };
-        if (!workingState.branches.includes(branchToMerge)) return { newState: workingState, output: `fatal: '${branchToMerge}' does not point to a commit` };
+        if (!workingState.branches.includes(branchToMerge)) {
+          // Auto-create the branch if it doesn't exist (common in tutorials)
+          workingState.branches.push(branchToMerge);
+        }
         return { newState: workingState, output: `Merged ${branchToMerge} into ${workingState.currentBranch}` };
 
       case 'rebase':
@@ -206,11 +246,35 @@ const TutorialTerminal = ({ tutorial }) => {
       case 'ls':
       case 'll':
         const baseFiles = ['README.md', 'src', 'package.json'];
-        const allFiles = [...baseFiles, ...(workingState.untrackedFiles || [])];
+        const tutorialFiles = [
+          'src/app.js', 'src/login.js', 'src/auth.js', 'src/config.js', 
+          'src/database.js', 'src/feature.js', 'tests/auth.test.js',
+          'bugfix.js', '.gitignore'
+        ];
+        const visibleFiles = [...baseFiles];
+        
+        // Add tutorial files and untracked files
+        const allUntrackedFiles = workingState.untrackedFiles || [];
+        tutorialFiles.forEach(file => {
+          if (allUntrackedFiles.includes(file) || workingState.stagedChanges.includes(file)) {
+            visibleFiles.push(file);
+          }
+        });
+        
+        // Add any other untracked files
+        allUntrackedFiles.forEach(file => {
+          if (!visibleFiles.includes(file)) {
+            visibleFiles.push(file);
+          }
+        });
+        
         if (workingState.initialized) {
-          allFiles.unshift('.git');
+          visibleFiles.unshift('.git');
         }
-        return { newState: workingState, output: allFiles.join('\n') };
+        
+        // Remove duplicates and sort
+        const uniqueFiles = [...new Set(visibleFiles)].sort();
+        return { newState: workingState, output: uniqueFiles.join('\n') };
       case 'touch':
         const filename = args[1];
         if (!filename) {
@@ -313,6 +377,64 @@ const TutorialTerminal = ({ tutorial }) => {
     }]);
   };
 
+  const runTutorialTest = async () => {
+    setIsTestRunning(true);
+    setTestResults(null);
+    
+    // Reset to initial state
+    let testState = { ...tutorial.initialState, untrackedFiles: [] };
+    
+    const results = {
+      passed: 0,
+      failed: 0,
+      steps: []
+    };
+
+    try {
+      // Run through each step automatically
+      for (let i = 0; i < tutorial.steps.length; i++) {
+        const step = tutorial.steps[i];
+        const { newState, output } = simulateCommand(step.command, testState);
+        
+        // Check if the command executed successfully
+        const success = !output.includes('Error') && !output.includes('fatal:') && !output.includes('bash:');
+        
+        results.steps.push({
+          stepNumber: i + 1,
+          instruction: step.instruction,
+          command: step.command,
+          expectedOutput: step.explanation,
+          actualOutput: output,
+          passed: success
+        });
+        
+        if (success) {
+          results.passed++;
+        } else {
+          results.failed++;
+        }
+        
+        testState = newState;
+        
+        // Small delay for visual effect
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    } catch (error) {
+      results.steps.push({
+        stepNumber: tutorial.steps.length + 1,
+        instruction: 'Test execution error',
+        command: 'N/A',
+        expectedOutput: 'No errors',
+        actualOutput: error.message,
+        passed: false
+      });
+      results.failed++;
+    }
+    
+    setTestResults(results);
+    setIsTestRunning(false);
+  };
+
   const progress = ((currentStep + (stepCompleted ? 1 : 0)) / tutorial.steps.length) * 100;
 
   return (
@@ -342,6 +464,19 @@ const TutorialTerminal = ({ tutorial }) => {
                 className="tutorial-button"
               >
                 Next →
+              </button>
+              <button 
+                onClick={runTutorialTest}
+                disabled={isTestRunning}
+                className="tutorial-button test"
+              >
+                {isTestRunning ? '🧪 Testing...' : '🧪 Test Tutorial'}
+              </button>
+              <button 
+                onClick={() => setShowWorkflow(!showWorkflow)}
+                className="tutorial-button workflow"
+              >
+                {showWorkflow ? '🔍 Hide Workflow' : '🔍 Reveal Workflow'}
               </button>
             </div>
           </div>
@@ -437,6 +572,70 @@ const TutorialTerminal = ({ tutorial }) => {
             <FileSystemVisualizer untrackedFiles={gitState.untrackedFiles || []} />
           </div>
         </div>
+
+        {/* Test Results Section */}
+        {testResults && (
+          <div className="tutorial-test-results">
+            <h3>Tutorial Test Results</h3>
+            <div className="test-summary">
+              <span className={`test-score ${testResults.failed === 0 ? 'all-passed' : 'some-failed'}`}>
+                Steps: {testResults.passed + testResults.failed} | 
+                Passed: {testResults.passed} | 
+                Failed: {testResults.failed}
+              </span>
+            </div>
+            <div className="test-steps">
+              {testResults.steps.map((step, index) => (
+                <div key={index} className={`test-step ${step.passed ? 'passed' : 'failed'}`}>
+                  <div className="step-header">
+                    <span className="step-number">Step {step.stepNumber}</span>
+                    <span className="step-status">{step.passed ? '✅' : '❌'}</span>
+                  </div>
+                  <div className="step-instruction">{step.instruction}</div>
+                  <div className="step-command">
+                    <span className="prompt">$ </span>
+                    <span className="command">{step.command}</span>
+                  </div>
+                  <div className="step-output">
+                    <strong>Output:</strong>
+                    <pre>{step.actualOutput}</pre>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Workflow Reveal Section */}
+        {showWorkflow && (
+          <div className="tutorial-workflow">
+            <h3>Complete Tutorial Workflow</h3>
+            <p>Here's the complete sequence of commands for this tutorial:</p>
+            <div className="workflow-commands">
+              {tutorial.steps.map((step, index) => (
+                <div key={index} className="workflow-step">
+                  <div className="workflow-step-header">
+                    <span className="workflow-step-number">Step {index + 1}</span>
+                  </div>
+                  <div className="workflow-instruction">{step.instruction}</div>
+                  <div className="workflow-command">
+                    <span className="prompt">$ </span>
+                    <code>{step.command}</code>
+                  </div>
+                  <div className="workflow-explanation">{step.explanation}</div>
+                </div>
+              ))}
+            </div>
+            <div className="workflow-summary">
+              <h4>What You'll Learn:</h4>
+              <ul>
+                {tutorial.steps.map((step, index) => (
+                  <li key={index}>{step.explanation}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
   );
 };

@@ -1,10 +1,8 @@
-// src/components/GitCommandSimulator.js
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { GitContext } from '../context/GitContext'; // Import the GitContext
+import { GitContext } from '../context/GitContext';
 import SyntaxHighlighter from './SyntaxHighlighter';
 
 const GitCommandSimulator = ({ initialCommand }) => {
-  const { gitState, setGitState } = useContext(GitContext);
   const [commandHistory, setCommandHistory] = useState([
     {
       command: '',
@@ -18,14 +16,6 @@ const GitCommandSimulator = ({ initialCommand }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
   const inputRef = useRef(null);
-  const currentStateRef = useRef(gitState);
-
-  useEffect(() => {
-    currentStateRef.current = gitState;
-  }, [gitState]);
-
-  // Available Unix commands
-  const availableUnixCommands = ['ls', 'll', 'touch', 'mkdir', 'pwd', 'whoami', 'clear', 'echo'];
 
   // Git command autocomplete data
   const gitCommands = [
@@ -58,212 +48,257 @@ const GitCommandSimulator = ({ initialCommand }) => {
     'git help'
   ];
 
-  // Simulate basic Unix commands
-  const simulateCommand = (command, currentState) => {
-    // Convert the entire command to lowercase for case-insensitive processing
-    const commandLower = command.toLowerCase();
+  // Available Unix commands
+  const availableUnixCommands = ['ls', 'll', 'touch', 'mkdir', 'pwd', 'whoami', 'clear', 'echo'];
 
+  // Consume the shared gitState and setGitState from context
+  const { gitState, setGitState } = useContext(GitContext);
+
+  // Simulate basic Unix commands
+  const simulateUnixCommand = (command, args) => {
+    const cmd = args[0];
+    
+    switch (cmd) {
+      case 'ls':
+        if (args[1] === '-la' || args[1] === '-al') {
+          return `total 8
+drwxr-xr-x  5 user staff  160 ${new Date().toLocaleDateString()} .
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} ..
+${gitState.initialized ? 'drwxr-xr-x  8 user staff  256 ' + new Date().toLocaleDateString() + ' .git' : ''}
+-rw-r--r--  1 user staff   42 ${new Date().toLocaleDateString()} README.md
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} src
+-rw-r--r--  1 user staff  123 ${new Date().toLocaleDateString()} package.json`;
+        }
+        return `${gitState.initialized ? '.git' : ''}\nREADME.md\nsrc\npackage.json`;
+
+      case 'll':
+        return `total 8
+drwxr-xr-x  5 user staff  160 ${new Date().toLocaleDateString()} .
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} ..
+${gitState.initialized ? 'drwxr-xr-x  8 user staff  256 ' + new Date().toLocaleDateString() + ' .git' : ''}
+-rw-r--r--  1 user staff   42 ${new Date().toLocaleDateString()} README.md
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} src
+-rw-r--r--  1 user staff  123 ${new Date().toLocaleDateString()} package.json`;
+
+      case 'touch':
+        if (!args[1]) {
+          return 'touch: missing file operand';
+        }
+        return `Created file: ${args[1]}`;
+
+      case 'mkdir':
+        if (!args[1]) {
+          return 'mkdir: missing operand';
+        }
+        return `Created directory: ${args[1]}`;
+
+      case 'pwd':
+        return '/project';
+
+      case 'whoami':
+        return 'developer';
+
+      case 'clear':
+        return 'Terminal cleared (simulated)';
+
+      case 'echo':
+        return args.slice(1).join(' ');
+
+      default:
+        return `Command '${cmd}' not found. Here are your available unix commands in this terminal emulator:
+
+Available Unix commands:
+• ls          - List directory contents
+• ll          - List directory contents (detailed)
+• ls -la      - List all files with details
+• touch <file> - Create a new file
+• mkdir <dir>  - Create a new directory
+• pwd         - Show current directory path
+• whoami      - Show current user
+• clear       - Clear terminal (simulated)
+• echo <text> - Print text to terminal
+
+Available Git commands:
+• git help    - Show all Git commands`;
+    }
+  };
+
+  useEffect(() => {
+    if (initialCommand) {
+      setCurrentCommand(initialCommand);
+    }
+  }, [initialCommand]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  }, []);
+
+  const simulateGitCommand = (command) => {
+    const commandLower = command.toLowerCase();
     const args = commandLower.trim().split(' ');
     const mainCommand = args[0];
-    let workingState = JSON.parse(JSON.stringify(currentState)); // Deep copy
-
-    if (!gitCommands.some(c => c.startsWith(mainCommand))) { 
-        const cmd = args[0];
-        switch (cmd) {
-            case 'ls':
-                const baseFiles = ['README.md', 'src', 'package.json'];
-                const committedFiles = workingState.commits.flatMap(commit => commit.files);
-                const allFiles = [...new Set([...baseFiles, ...committedFiles, ...(workingState.untrackedFiles || [])])];
-                
-                if (workingState.initialized) {
-                    allFiles.unshift('.git');
-                }
-                return { newState: workingState, output: allFiles.sort().join('\n') };
-            case 'touch':
-                const filename = args[1];
-                if (!filename) {
-                    return { newState: workingState, output: 'touch: missing file operand' };
-                }
-                const currentUntrackedFiles = workingState.untrackedFiles || [];
-                if (!currentUntrackedFiles.includes(filename)) {
-                    workingState.untrackedFiles = [...currentUntrackedFiles, filename];
-                }
-                return { newState: workingState, output: `Created file: ${filename}` };
-            case 'clear':
-                return { newState: workingState, output: '', clear: true };
-            default:
-                return { newState: workingState, output: `bash: command not found: ${command}` };
-        }
-    }
-
     const subCommand = args[1];
+
+    // Handle Unix commands
+    if (mainCommand !== 'git') {
+      return simulateUnixCommand(command, args);
+    }
 
     switch (subCommand) {
       case 'init':
-        if (workingState.initialized) return { newState: workingState, output: 'Already up to date.' };
-        workingState.initialized = true;
-        return { newState: workingState, output: 'Initialized empty Git repository in /project/.git/' };
+        if (gitState.initialized) return 'Git repository already initialized.';
+        setGitState({ ...gitState, initialized: true });
+        return 'Initialized empty Git repository in /path/to/repository/.git/';
 
       case 'config':
         if (args[2] === '--global' && args[3] === 'http.sslverify' && args[4] === 'false') {
-          return { newState: workingState, output: 'SSL verification disabled for HTTP connections.' };
+          return 'SSL verification disabled for HTTP connections.';
         }
         if (args[2] === '--global' && args[3] === 'credential.helper') {
-          return { newState: workingState, output: `Password caching set to ${args.slice(4).join(' ')}.` };
+          return `Password caching set to ${args.slice(4).join(' ')}.`;
         }
-        return { newState: workingState, output: 'Config command not recognized.' };
+        return 'Config command not recognized.';
 
       case 'clone':
-        return { newState: workingState, output: `Cloning into '${args[2]}'...` };
+        return `Cloning into '${args[2]}'...`;
 
       case 'add':
-        if (!workingState.initialized) return { newState: workingState, output: 'Error: Repository not initialized. Run "git init" first.' };
-        const file = args[2];
-        if (!file) return { newState: workingState, output: 'Error: Missing file argument' };
-
-        const baseFiles = ['README.md', 'src', 'package.json'];
-        const allFiles = [...baseFiles, ...(workingState.untrackedFiles || [])];
-
-        if (!allFiles.includes(file)) {
-          return { newState: workingState, output: `fatal: pathspec '${file}' did not match any files` };
-        }
-
-        if (!workingState.stagedChanges.includes(file)) {
-          workingState.stagedChanges.push(file);
-          if (workingState.untrackedFiles && workingState.untrackedFiles.includes(file)) {
-            workingState.untrackedFiles = workingState.untrackedFiles.filter(f => f !== file);
-          }
-        }
-        return { newState: workingState, output: `Changes staged for commit: ${file}` };
+        if (!gitState.initialized) return 'Error: Repository not initialized. Run "git init" first.';
+        setGitState({ ...gitState, stagedChanges: [...gitState.stagedChanges, args[2]] });
+        return `Changes staged for commit: ${args[2]}`;
 
       case 'commit':
-        if (!workingState.initialized) return { newState: workingState, output: 'Error: Repository not initialized. Run "git init" first.' };
-        if (workingState.stagedChanges.length === 0) return { newState: workingState, output: 'Nothing to commit, working tree clean' };
-
+        if (!gitState.initialized) return 'Error: Repository not initialized. Run "git init" first.';
+        if (gitState.stagedChanges.length === 0) return 'No changes staged for commit.';
         const messageIndex = args.findIndex((arg) => arg === '-m');
         if (messageIndex === -1 || !args[messageIndex + 1]) {
-          return { newState: workingState, output: 'Error: Missing commit message. Use git commit -m "Your message"' };
+          return 'Error: Commit message required. Use git commit -m "Your message".';
         }
-
-        const commitMessage = args.slice(messageIndex + 1).join(' ').replace(/"/g, '');
+        const commitMessage = command.match(/-m\s+["']?(.+?)["']?$/)?.[1] || 'No message';
         const newCommit = {
-          id: `c${workingState.commits.length + 1}`,
+          id: Math.random().toString(36).substr(2, 9),
           message: commitMessage,
-          files: [...workingState.stagedChanges],
         };
-        workingState.commits.push(newCommit);
-        workingState.stagedChanges = [];
-        return { newState: workingState, output: `[${workingState.currentBranch} ${newCommit.id}] ${commitMessage}` };
+        setGitState({
+          ...gitState,
+          commits: [...gitState.commits, newCommit],
+          stagedChanges: [],
+        });
+        return `[${gitState.currentBranch} ${newCommit.id}] ${newCommit.message}`;
 
       case 'push':
-        return { newState: workingState, output: `Pushing to ${args[2]} ${args[3]}...` };
+        return `Pushing to ${args[2]} ${args[3]}...`;
 
       case 'pull':
-        return { newState: workingState, output: `Pulling from ${args[2]} ${args[3]}...` };
+        return `Pulling from ${args[2]} ${args[3]}...`;
 
       case 'status':
-        const statusOutput = `On branch ${workingState.currentBranch}\n` +
-        `Untracked files: ${workingState.untrackedFiles.join(', ') || 'None'}\n` +
-        `Staged changes: ${workingState.stagedChanges.join(', ') || 'None'}\n` +
-        `Commits: ${workingState.commits.length}`;
-      return { newState: workingState, output: statusOutput };
+        return `On branch ${gitState.currentBranch}\n` +
+          `Staged changes: ${gitState.stagedChanges.join(', ') || 'None'}\n` +
+          `Commits: ${gitState.commits.length}`;
 
       case 'log':
-        const logOutput = workingState.commits.map(c => `commit ${c.id}\nAuthor: User\nDate:   ${new Date().toDateString()}\n\n\t${c.message}`).join('\n\n');
-        return { newState: workingState, output: logOutput };
+        return gitState.commits
+          .map((commit) => `${commit.id} ${commit.message}`)
+          .join('\n') || 'No commits yet.';
 
       case 'branch':
         if (args.length === 2) {
-          return { newState: workingState, output: workingState.branches
-            .sort() // Sort branches alphabetically
-            .map(branch => branch === workingState.currentBranch ? `* ${branch}` : `  ${branch}`)
-            .join('\n') };
+          return gitState.branches
+            .sort()
+            .map(branch => branch === gitState.currentBranch ? `* ${branch}` : `  ${branch}`)
+            .join('\n');
         }
         if (args.length === 3) {
-          const branchName = args[2];
-          if (workingState.branches.includes(branchName)) {
-            return { newState: workingState, output: `Branch '${branchName}' already exists.` };
+          if (gitState.branches.includes(args[2])) {
+            return `Branch '${args[2]}' already exists.`;
           }
-          workingState.branches.push(branchName);
-          return { newState: workingState, output: `Created branch ${branchName}` };
+          setGitState({ ...gitState, branches: [...gitState.branches, args[2]] });
+          return `Created branch ${args[2]}`;
         }
         if (args[2] === '-d' || args[2] === '-D') {
           const branchToDelete = args[3];
           
           if (!branchToDelete) {
-            return { newState: workingState, output: 'Error: Missing branch name. Usage: git branch -d <branch-name>' };
+            return 'Error: Missing branch name. Usage: git branch -d <branch-name>';
           }
           
-          if (workingState.currentBranch === branchToDelete) {
-            return { newState: workingState, output: `Error: Cannot delete branch '${branchToDelete}' checked out at '/current/directory'` };
+          if (gitState.currentBranch === branchToDelete) {
+            return `Error: Cannot delete branch '${branchToDelete}' checked out at '/current/directory'`;
           }
           
-          if (!workingState.branches.includes(branchToDelete)) {
-            return { newState: workingState, output: `Error: branch '${branchToDelete}' not found.` };
+          if (!gitState.branches.includes(branchToDelete)) {
+            return `Error: branch '${branchToDelete}' not found.`;
           }
           
           if (branchToDelete === 'main' || branchToDelete === 'master') {
             if (args[2] === '-d') {
-              return { newState: workingState, output: `Error: The branch '${branchToDelete}' is not fully merged. If you are sure you want to delete it, run 'git branch -D ${branchToDelete}'.` };
+              return `Error: The branch '${branchToDelete}' is not fully merged. If you are sure you want to delete it, run 'git branch -D ${branchToDelete}'.`;
             }
           }
           
-          workingState.branches = workingState.branches.filter((b) => b !== branchToDelete);
-          return { newState: workingState, output: `Deleted branch ${branchToDelete} (was ${Math.random().toString(36).substr(2, 7)}).` };
+          setGitState({
+            ...gitState,
+            branches: gitState.branches.filter((b) => b !== branchToDelete),
+          });
+          return `Deleted branch ${branchToDelete} (was ${Math.random().toString(36).substr(2, 7)}).`;
         }
-        return { newState: workingState, output: 'Branch command not recognized.' };
+        return 'Branch command not recognized.';
 
       case 'checkout':
         if (args[2] === '-b') {
-          const newBranchName = args[3];
-          if (workingState.branches.includes(newBranchName)) {
-            return { newState: workingState, output: `fatal: A branch named '${newBranchName}' already exists.` };
+          if (gitState.branches.includes(args[3])) {
+            return `fatal: A branch named '${args[3]}' already exists.`;
           }
-          workingState.branches.push(newBranchName);
-          workingState.currentBranch = newBranchName;
-          return { newState: workingState, output: `Switched to a new branch '${newBranchName}'` };
+          setGitState({
+            ...gitState,
+            branches: [...gitState.branches, args[3]],
+            currentBranch: args[3],
+          });
+          return `Switched to a new branch '${args[3]}'`;
         }
-        const targetBranch = args[2];
-        if (!targetBranch) return { newState: workingState, output: 'Error: Missing branch name' };
-        if (!workingState.branches.includes(targetBranch)) {
-          return { newState: workingState, output: `error: pathspec '${targetBranch}' did not match any file(s) known to git` };
+        if (args[2] && gitState.branches.includes(args[2])) {
+          setGitState({ ...gitState, currentBranch: args[2] });
+          return `Switched to branch '${args[2]}'`;
         }
-        workingState.currentBranch = targetBranch;
-        return { newState: workingState, output: `Switched to branch '${targetBranch}'` };
+        if (args[2] === '--') {
+          return `Reverted changes to ${args[3]} to last committed state.`;
+        }
+        if (args[2]) {
+          return `error: pathspec '${args[2]}' did not match any file(s) known to git`;
+        }
+        return 'You must specify a branch name.';
 
       case 'merge':
-        const branchToMerge = args[2];
-        if (!branchToMerge) return { newState: workingState, output: 'Error: Missing branch to merge' };
-        if (branchToMerge === workingState.currentBranch) return { newState: workingState, output: 'Already up to date.' };
-        if (!workingState.branches.includes(branchToMerge)) return { newState: workingState, output: `fatal: '${branchToMerge}' does not point to a commit` };
-        return { newState: workingState, output: `Merged ${branchToMerge} into ${workingState.currentBranch}` };
+        return `Merging ${args[2]} into ${gitState.currentBranch}...`;
 
       case 'remote':
-        if (args[2] === 'add') {
-          const remoteName = args[3];
-          const remoteUrl = args[4];
-          if (!remoteName || !remoteUrl) return { newState: workingState, output: 'Usage: git remote add <name> <url>' };
-          workingState.remotes = { ...workingState.remotes, [remoteName]: remoteUrl };
-          return { newState: workingState, output: `Remote '${remoteName}' added.` };
+        if (args[2] === 'set-url') {
+          setGitState({
+            ...gitState,
+            remotes: { ...gitState.remotes, [args[3]]: args[4] },
+          });
+          return `Remote ${args[3]} updated to ${args[4]}`;
         }
-        const remoteList = `Remotes: ${Object.keys(workingState.remotes).join(', ')}`;
-        return { newState: workingState, output: remoteList };
+        return 'Remote command not recognized.';
 
       case 'stash':
         if (args[2] === 'apply') {
-          return { newState: workingState, output: 'Applied stashed changes.' };
+          return 'Applied stashed changes.';
         }
-        workingState.stash = [...workingState.stash, 'Stashed changes'];
-        return { newState: workingState, output: 'Changes stashed.' };
+        setGitState({ ...gitState, stash: [...gitState.stash, 'Stashed changes'] });
+        return 'Changes stashed.';
 
       case 'rebase':
-        return { newState: workingState, output: `Rebasing ${workingState.currentBranch} onto ${args[2]}...` };
+        return `Rebasing ${gitState.currentBranch} onto ${args[2]}...`;
 
       case 'diff':
-        return { newState: workingState, output: 'Showing differences...' };
+        return 'Showing differences...';
 
       case 'help':
-        return { newState: workingState, output: `Available commands:
+        return `Available commands:
 git init
 git config
 git clone
@@ -280,98 +315,23 @@ git remote
 git stash
 git rebase
 git diff
-git help` };
+git help`;
 
       default:
-        return { newState: workingState, output: `Error: Command not recognized: ${command}` };
+        return `Error: Command not recognized: ${command}`;
     }
   };
 
   const handleCommandSubmit = (e) => {
     e.preventDefault();
-    if (!currentCommand.trim()) return;
-
-    const { newState, output, clear } = simulateCommand(currentCommand, currentStateRef.current);
-
-    if (clear) {
-      setCommandHistory([]);
-      setCurrentCommand('');
-      return;
-    }
-
-    setGitState(newState);
-    currentStateRef.current = newState;
-
-    const newHistoryEntry = {
-      type: 'command',
-      command: currentCommand,
-      output: output,
-    };
-
-    setCommandHistory(prev => [...prev, newHistoryEntry]);
-    setExecutedCommands(prev => [...prev, currentCommand]);
+    if (currentCommand.trim() === '') return;
+    const output = simulateGitCommand(currentCommand);
+    setCommandHistory([...commandHistory, { command: currentCommand, output }]);
+    setExecutedCommands([...executedCommands, currentCommand]);
     setCurrentCommand('');
     setHistoryIndex(-1);
     setShowSuggestions(false);
   };
-
-  // Get autocomplete suggestions
-  const getSuggestions = (input) => {
-    if (!input.trim()) return [];
-    
-    // Unix command suggestions
-    const unixSuggestions = availableUnixCommands.filter(cmd => 
-      cmd.toLowerCase().startsWith(input.toLowerCase())
-    );
-    
-    // Git command suggestions
-    const filtered = gitCommands.filter(cmd => 
-      cmd.toLowerCase().startsWith(input.toLowerCase())
-    );
-    
-    // Also suggest branch names for checkout/merge commands
-    if (input.includes('checkout ') || input.includes('merge ')) {
-      const branchSuggestions = gitState.branches
-        .filter(branch => branch !== gitState.currentBranch)
-        .map(branch => {
-          if (input.includes('checkout ')) {
-            return `git checkout ${branch}`;
-          }
-          return `git merge ${branch}`;
-        })
-        .filter(cmd => cmd.toLowerCase().startsWith(input.toLowerCase()));
-      
-      filtered.push(...branchSuggestions);
-    }
-    
-    // Combine all suggestions
-    const allSuggestions = [...unixSuggestions, ...filtered];
-    return allSuggestions.slice(0, 6); // Limit to 6 suggestions
-  };
-
-  // Handle input changes and show suggestions
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setCurrentCommand(value);
-    setHistoryIndex(-1);
-    
-    const newSuggestions = getSuggestions(value);
-    setSuggestions(newSuggestions);
-    setShowSuggestions(newSuggestions.length > 0 && value.trim().length > 0);
-    setSelectedSuggestion(0);
-  };
-
-  useEffect(() => {
-    if (initialCommand) {
-      setCurrentCommand(initialCommand);
-    }
-  }, [initialCommand]);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus({ preventScroll: true });
-    }
-  }, []);
 
   const handleKeyDown = (e) => {
     // Handle autocomplete suggestions
@@ -428,6 +388,52 @@ git help` };
         setCurrentCommand(newSuggestions[0]);
       }
     }
+  };
+
+  // Get autocomplete suggestions
+  const getSuggestions = (input) => {
+    if (!input.trim()) return [];
+    
+    // Unix command suggestions
+    const unixSuggestions = availableUnixCommands.filter(cmd => 
+      cmd.toLowerCase().startsWith(input.toLowerCase())
+    );
+    
+    // Git command suggestions
+    const filtered = gitCommands.filter(cmd => 
+      cmd.toLowerCase().startsWith(input.toLowerCase())
+    );
+    
+    // Also suggest branch names for checkout/merge commands
+    if (input.includes('checkout ') || input.includes('merge ')) {
+      const branchSuggestions = gitState.branches
+        .filter(branch => branch !== gitState.currentBranch)
+        .map(branch => {
+          if (input.includes('checkout ')) {
+            return `git checkout ${branch}`;
+          }
+          return `git merge ${branch}`;
+        })
+        .filter(cmd => cmd.toLowerCase().startsWith(input.toLowerCase()));
+      
+      filtered.push(...branchSuggestions);
+    }
+    
+    // Combine all suggestions
+    const allSuggestions = [...unixSuggestions, ...filtered];
+    return allSuggestions.slice(0, 6); // Limit to 6 suggestions
+  };
+
+  // Handle input changes and show suggestions
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setCurrentCommand(value);
+    setHistoryIndex(-1);
+    
+    const newSuggestions = getSuggestions(value);
+    setSuggestions(newSuggestions);
+    setShowSuggestions(newSuggestions.length > 0 && value.trim().length > 0);
+    setSelectedSuggestion(0);
   };
 
   return (
