@@ -1,6 +1,6 @@
-// src/components/GitCommandSimulator.js
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { GitContext } from '../context/GitContext'; // Import the GitContext
+import { GitContext } from '../context/GitContext';
+import SyntaxHighlighter from './SyntaxHighlighter';
 
 const GitCommandSimulator = ({ initialCommand }) => {
   const [commandHistory, setCommandHistory] = useState([
@@ -10,10 +10,118 @@ const GitCommandSimulator = ({ initialCommand }) => {
     },
   ]);
   const [currentCommand, setCurrentCommand] = useState('');
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [executedCommands, setExecutedCommands] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState(0);
   const inputRef = useRef(null);
+
+  // Git command autocomplete data
+  const gitCommands = [
+    'git init',
+    'git add',
+    'git commit',
+    'git commit -m',
+    'git push',
+    'git push origin',
+    'git pull',
+    'git pull origin',
+    'git status',
+    'git log',
+    'git branch',
+    'git branch -d',
+    'git branch -D',
+    'git checkout',
+    'git checkout -b',
+    'git checkout --',
+    'git merge',
+    'git remote',
+    'git remote set-url',
+    'git stash',
+    'git stash apply',
+    'git rebase',
+    'git diff',
+    'git config',
+    'git config --global',
+    'git clone',
+    'git help'
+  ];
+
+  // Available Unix commands
+  const availableUnixCommands = ['ls', 'll', 'touch', 'mkdir', 'pwd', 'whoami', 'clear', 'echo'];
 
   // Consume the shared gitState and setGitState from context
   const { gitState, setGitState } = useContext(GitContext);
+
+  // Simulate basic Unix commands
+  const simulateUnixCommand = (command, args) => {
+    const cmd = args[0];
+    
+    switch (cmd) {
+      case 'ls':
+        if (args[1] === '-la' || args[1] === '-al') {
+          return `total 8
+drwxr-xr-x  5 user staff  160 ${new Date().toLocaleDateString()} .
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} ..
+${gitState.initialized ? 'drwxr-xr-x  8 user staff  256 ' + new Date().toLocaleDateString() + ' .git' : ''}
+-rw-r--r--  1 user staff   42 ${new Date().toLocaleDateString()} README.md
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} src
+-rw-r--r--  1 user staff  123 ${new Date().toLocaleDateString()} package.json`;
+        }
+        return `${gitState.initialized ? '.git' : ''}\nREADME.md\nsrc\npackage.json`;
+
+      case 'll':
+        return `total 8
+drwxr-xr-x  5 user staff  160 ${new Date().toLocaleDateString()} .
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} ..
+${gitState.initialized ? 'drwxr-xr-x  8 user staff  256 ' + new Date().toLocaleDateString() + ' .git' : ''}
+-rw-r--r--  1 user staff   42 ${new Date().toLocaleDateString()} README.md
+drwxr-xr-x  3 user staff   96 ${new Date().toLocaleDateString()} src
+-rw-r--r--  1 user staff  123 ${new Date().toLocaleDateString()} package.json`;
+
+      case 'touch':
+        if (!args[1]) {
+          return 'touch: missing file operand';
+        }
+        return `Created file: ${args[1]}`;
+
+      case 'mkdir':
+        if (!args[1]) {
+          return 'mkdir: missing operand';
+        }
+        return `Created directory: ${args[1]}`;
+
+      case 'pwd':
+        return '/project';
+
+      case 'whoami':
+        return 'developer';
+
+      case 'clear':
+        return 'Terminal cleared (simulated)';
+
+      case 'echo':
+        return args.slice(1).join(' ');
+
+      default:
+        return `Command '${cmd}' not found. Here are your available unix commands in this terminal emulator:
+
+Available Unix commands:
+• ls          - List directory contents
+• ll          - List directory contents (detailed)
+• ls -la      - List all files with details
+• touch <file> - Create a new file
+• mkdir <dir>  - Create a new directory
+• pwd         - Show current directory path
+• whoami      - Show current user
+• clear       - Clear terminal (simulated)
+• echo <text> - Print text to terminal
+
+Available Git commands:
+• git help    - Show all Git commands`;
+    }
+  };
 
   useEffect(() => {
     if (initialCommand) {
@@ -28,15 +136,14 @@ const GitCommandSimulator = ({ initialCommand }) => {
   }, []);
 
   const simulateGitCommand = (command) => {
-    // Convert the entire command to lowercase for case-insensitive processing
     const commandLower = command.toLowerCase();
-
     const args = commandLower.trim().split(' ');
-    const mainCommand = args[0]; // 'git'
+    const mainCommand = args[0];
     const subCommand = args[1];
 
+    // Handle Unix commands
     if (mainCommand !== 'git') {
-      return `Error: Command not recognized: ${command}`;
+      return simulateUnixCommand(command, args);
     }
 
     switch (subCommand) {
@@ -99,7 +206,10 @@ const GitCommandSimulator = ({ initialCommand }) => {
 
       case 'branch':
         if (args.length === 2) {
-          return gitState.branches.join('\n');
+          return gitState.branches
+            .sort()
+            .map(branch => branch === gitState.currentBranch ? `* ${branch}` : `  ${branch}`)
+            .join('\n');
         }
         if (args.length === 3) {
           if (gitState.branches.includes(args[2])) {
@@ -109,21 +219,38 @@ const GitCommandSimulator = ({ initialCommand }) => {
           return `Created branch ${args[2]}`;
         }
         if (args[2] === '-d' || args[2] === '-D') {
-          if (gitState.currentBranch === args[3]) {
-            return 'Error: Cannot delete the current branch.';
+          const branchToDelete = args[3];
+          
+          if (!branchToDelete) {
+            return 'Error: Missing branch name. Usage: git branch -d <branch-name>';
           }
+          
+          if (gitState.currentBranch === branchToDelete) {
+            return `Error: Cannot delete branch '${branchToDelete}' checked out at '/current/directory'`;
+          }
+          
+          if (!gitState.branches.includes(branchToDelete)) {
+            return `Error: branch '${branchToDelete}' not found.`;
+          }
+          
+          if (branchToDelete === 'main' || branchToDelete === 'master') {
+            if (args[2] === '-d') {
+              return `Error: The branch '${branchToDelete}' is not fully merged. If you are sure you want to delete it, run 'git branch -D ${branchToDelete}'.`;
+            }
+          }
+          
           setGitState({
             ...gitState,
-            branches: gitState.branches.filter((b) => b !== args[3]),
+            branches: gitState.branches.filter((b) => b !== branchToDelete),
           });
-          return `Deleted branch ${args[3]}`;
+          return `Deleted branch ${branchToDelete} (was ${Math.random().toString(36).substr(2, 7)}).`;
         }
         return 'Branch command not recognized.';
 
       case 'checkout':
         if (args[2] === '-b') {
           if (gitState.branches.includes(args[3])) {
-            return `Branch '${args[3]}' already exists.`;
+            return `fatal: A branch named '${args[3]}' already exists.`;
           }
           setGitState({
             ...gitState,
@@ -132,14 +259,17 @@ const GitCommandSimulator = ({ initialCommand }) => {
           });
           return `Switched to a new branch '${args[3]}'`;
         }
-        if (gitState.branches.includes(args[2])) {
+        if (args[2] && gitState.branches.includes(args[2])) {
           setGitState({ ...gitState, currentBranch: args[2] });
           return `Switched to branch '${args[2]}'`;
         }
         if (args[2] === '--') {
           return `Reverted changes to ${args[3]} to last committed state.`;
         }
-        return 'Branch not found.';
+        if (args[2]) {
+          return `error: pathspec '${args[2]}' did not match any file(s) known to git`;
+        }
+        return 'You must specify a branch name.';
 
       case 'merge':
         return `Merging ${args[2]} into ${gitState.currentBranch}...`;
@@ -194,10 +324,116 @@ git help`;
 
   const handleCommandSubmit = (e) => {
     e.preventDefault();
-    if (currentCommand.trim() === '') return; // Prevent empty commands
+    if (currentCommand.trim() === '') return;
     const output = simulateGitCommand(currentCommand);
     setCommandHistory([...commandHistory, { command: currentCommand, output }]);
+    setExecutedCommands([...executedCommands, currentCommand]);
     setCurrentCommand('');
+    setHistoryIndex(-1);
+    setShowSuggestions(false);
+  };
+
+  const handleKeyDown = (e) => {
+    // Handle autocomplete suggestions
+    if (showSuggestions && suggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedSuggestion(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : 0
+        );
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedSuggestion(prev => 
+          prev > 0 ? prev - 1 : suggestions.length - 1
+        );
+        return;
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        setCurrentCommand(suggestions[selectedSuggestion]);
+        setShowSuggestions(false);
+        return;
+      } else if (e.key === 'Escape') {
+        setShowSuggestions(false);
+        return;
+      }
+    }
+
+    // Handle command history when no suggestions are shown
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setShowSuggestions(false);
+      if (executedCommands.length > 0) {
+        const newIndex = historyIndex + 1;
+        if (newIndex < executedCommands.length) {
+          setHistoryIndex(newIndex);
+          setCurrentCommand(executedCommands[executedCommands.length - 1 - newIndex]);
+        }
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setShowSuggestions(false);
+      if (historyIndex > 0) {
+        const newIndex = historyIndex - 1;
+        setHistoryIndex(newIndex);
+        setCurrentCommand(executedCommands[executedCommands.length - 1 - newIndex]);
+      } else if (historyIndex === 0) {
+        setHistoryIndex(-1);
+        setCurrentCommand('');
+      }
+    } else if (e.key === 'Tab' && currentCommand.trim().length > 0) {
+      e.preventDefault();
+      const newSuggestions = getSuggestions(currentCommand);
+      if (newSuggestions.length > 0) {
+        setCurrentCommand(newSuggestions[0]);
+      }
+    }
+  };
+
+  // Get autocomplete suggestions
+  const getSuggestions = (input) => {
+    if (!input.trim()) return [];
+    
+    // Unix command suggestions
+    const unixSuggestions = availableUnixCommands.filter(cmd => 
+      cmd.toLowerCase().startsWith(input.toLowerCase())
+    );
+    
+    // Git command suggestions
+    const filtered = gitCommands.filter(cmd => 
+      cmd.toLowerCase().startsWith(input.toLowerCase())
+    );
+    
+    // Also suggest branch names for checkout/merge commands
+    if (input.includes('checkout ') || input.includes('merge ')) {
+      const branchSuggestions = gitState.branches
+        .filter(branch => branch !== gitState.currentBranch)
+        .map(branch => {
+          if (input.includes('checkout ')) {
+            return `git checkout ${branch}`;
+          }
+          return `git merge ${branch}`;
+        })
+        .filter(cmd => cmd.toLowerCase().startsWith(input.toLowerCase()));
+      
+      filtered.push(...branchSuggestions);
+    }
+    
+    // Combine all suggestions
+    const allSuggestions = [...unixSuggestions, ...filtered];
+    return allSuggestions.slice(0, 6); // Limit to 6 suggestions
+  };
+
+  // Handle input changes and show suggestions
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setCurrentCommand(value);
+    setHistoryIndex(-1);
+    
+    const newSuggestions = getSuggestions(value);
+    setSuggestions(newSuggestions);
+    setShowSuggestions(newSuggestions.length > 0 && value.trim().length > 0);
+    setSelectedSuggestion(0);
   };
 
   return (
@@ -207,14 +443,17 @@ git help`;
           {entry.command ? (
             <>
               <div className="command-prompt">
-                $ <span className="user-command">{entry.command}</span>
+                $ <span className="user-command">
+                  <SyntaxHighlighter command={entry.command} type="command" />
+                </span>
               </div>
               <div
                 className={`command-output ${
                   entry.output.startsWith('Error:') ? 'error' : ''
                 }`}
+                style={{ whiteSpace: 'pre-line' }}
               >
-                {entry.output}
+                <SyntaxHighlighter command={entry.output} type="output" />
               </div>
             </>
           ) : (
@@ -227,7 +466,8 @@ git help`;
         <input
           type="text"
           value={currentCommand}
-          onChange={(e) => setCurrentCommand(e.target.value)}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           className="terminal-input"
           placeholder="Type your command here..."
           ref={inputRef}
@@ -236,6 +476,27 @@ git help`;
           Send
         </button>
       </form>
+      
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="autocomplete-dropdown">
+          {suggestions.map((suggestion, index) => (
+            <div
+              key={index}
+              className={`autocomplete-item ${index === selectedSuggestion ? 'selected' : ''}`}
+              onClick={() => {
+                setCurrentCommand(suggestion);
+                setShowSuggestions(false);
+                inputRef.current?.focus();
+              }}
+            >
+              <SyntaxHighlighter command={suggestion} type="command" />
+            </div>
+          ))}
+          <div className="autocomplete-hint">
+            Use ↑↓ to navigate, Tab to complete, Esc to close
+          </div>
+        </div>
+      )}
     </div>
   );
 };

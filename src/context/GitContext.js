@@ -12,6 +12,7 @@ export const GitProvider = ({ children }) => {
     stagedChanges: [],
     remotes: {},
     stash: [],
+    untrackedFiles: [], // Files in working directory that Git doesn't track
   });
 
   return (
